@@ -1,6 +1,6 @@
 module Main (main) where
 
-import qualified CTG1371
+import qualified Data.CTG1371.Parser
 
 main :: IO ()
-main = CTG1371.main
+main = undefined
