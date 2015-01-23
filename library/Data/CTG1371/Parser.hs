@@ -1,4 +1,15 @@
-module Data.CTG1371.Parser (ctgParser)  where
+module Data.CTG1371.Parser (ctgParser
+                           , CTGStatus(..)
+                           , CTGData(..)
+                           , SignalQuality(..)
+                           , FetalMovement(..)
+                           , HR(..)
+                           , HR1(..)
+                           , HR2(..)
+                           , MHR(..)
+                           , TOCO(..)
+                           , HRMode(..)
+                           , TOCOMode(..))  where
 
 import Data.Word
 import Data.Bits
@@ -49,11 +60,11 @@ data CTGData = CTGData { ctgStatus::CTGStatus
                        , ctgMHRMode::HRMode
                        , ctgTocoMode::TOCOMode
                        } deriving (Show)
-testData::ByteString                                  
---testData = pack [67, -128, 32, 65, 104, 65, 104, 65, 104, 65, 104, 66, 40, 66, 40, 66, 40, 66, 40, 65, -32, 65, -32, 65, -32, 65, -32, 4, 4, 4, 4, 34, 96, 10, 0]
-testData = pack [67, -128, 0, 33, 91, 33, 91, 33, 91, 33, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 2, 0, 0]
-testParse::IO()
-testParse = print $ ctgParser testData
+--testData::ByteString                                  
+--testData = pack [66, -128, 32, 65, 104, 65, 104, 65, 104, 65, 104, 66, 40, 66, 40, 66, 40, 66, 40, 65, -32, 65, -32, 65, -32, 65, -32, 4, 4, 4, 4, 34, 96, 10, 0]
+--testData = pack [67, -128, 0, 33, 91, 33, 91, 33, 91, 33, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 2, 0, 0]
+--testParse::IO()
+--testParse = print $ ctgParser testData
 
 --expose this module
 ctgParser::ByteString -> CTGData
@@ -66,34 +77,34 @@ ctgParser ctgdata =do
 --function used by runget to parse the data
 parseCTG ::  G.Get CTGData
 parseCTG = do
-  _         <- G.getWord8
+  c         <- G.getWord8
+  if c /= 67 then fail "Submitted data is not a C block" else do  
+    status    <- fmap parseStatus G.getWord16be
 
-  status    <- fmap parseStatus G.getWord16be
+    hr1Block4 <- fmap unpackHR1 G.getWord16be
+    hr1Block3 <- fmap unpackHR1 G.getWord16be
+    hr1Block2 <- fmap unpackHR1 G.getWord16be
+    hr1Block1 <- fmap unpackHR1 G.getWord16be
 
-  hr1Block4 <- fmap unpackHR1 G.getWord16be
-  hr1Block3 <- fmap unpackHR1 G.getWord16be
-  hr1Block2 <- fmap unpackHR1 G.getWord16be
-  hr1Block1 <- fmap unpackHR1 G.getWord16be
+    hr2Block4 <- fmap unpackHR2 G.getWord16be
+    hr2Block3 <- fmap unpackHR2 G.getWord16be
+    hr2Block2 <- fmap unpackHR2 G.getWord16be
+    hr2Block1 <- fmap unpackHR2 G.getWord16be
 
-  hr2Block4 <- fmap unpackHR2 G.getWord16be
-  hr2Block3 <- fmap unpackHR2 G.getWord16be
-  hr2Block2 <- fmap unpackHR2 G.getWord16be
-  hr2Block1 <- fmap unpackHR2 G.getWord16be
+    mhrBlock4 <- fmap unpackMHR G.getWord16be
+    mhrBlock3 <- fmap unpackMHR G.getWord16be
+    mhrBlock2 <- fmap unpackMHR G.getWord16be
+    mhrBlock1 <- fmap unpackMHR G.getWord16be
 
-  mhrBlock4 <- fmap unpackMHR G.getWord16be
-  mhrBlock3 <- fmap unpackMHR G.getWord16be
-  mhrBlock2 <- fmap unpackMHR G.getWord16be
-  mhrBlock1 <- fmap unpackMHR G.getWord16be
+    tocoBlock4 <- fmap unpackToco G.getWord8
+    tocoBlock3 <- fmap unpackToco G.getWord8
+    tocoBlock2 <- fmap unpackToco G.getWord8
+    tocoBlock1 <- fmap unpackToco G.getWord8
 
-  tocoBlock4 <- fmap unpackToco G.getWord8
-  tocoBlock3 <- fmap unpackToco G.getWord8
-  tocoBlock2 <- fmap unpackToco G.getWord8
-  tocoBlock1 <- fmap unpackToco G.getWord8
-
-  (hr1Mode,hr2Mode,mhrMode)     <- fmap unpackHRMode G.getWord16be
-  tocoMode   <- fmap unpackTocoMode G.getWord8
+    (hr1Mode,hr2Mode,mhrMode)     <- fmap unpackHRMode G.getWord16be
+    tocoMode   <- fmap unpackTocoMode G.getWord8
   
-  return (CTGData
+    return (CTGData
             status
             [hr1Block1,hr1Block2,hr1Block3,hr1Block4]
             [hr2Block1,hr2Block2,hr2Block3,hr2Block4]
@@ -101,6 +112,7 @@ parseCTG = do
             [tocoBlock1,tocoBlock2,tocoBlock3,tocoBlock4]
             hr1Mode hr2Mode mhrMode tocoMode)
 
+{-
 dumpCTG::G.Get (Int,Int,Int,Int,Int,Int,Int)
 dumpCTG = do
   _ <- G.getWord8
@@ -130,7 +142,7 @@ dumpCTG = do
   return (status,hr1Block4,hr1Block3,hr1Block2,hr1Block1,hr2Block4,hrMode)
 
 runDump =  print $ G.runGet dumpCTG testData
-             
+-}             
 --unpack an hr block
 unpackHR1:: Word16 -> HR1
 unpackHR1 hrdata = HR1 checkFetalMovement (unpackHR hrdata)
@@ -143,10 +155,10 @@ unpackHR1Mode :: Word16 -> HRMode
 unpackHR1Mode hrdata = translateHRMode $ (hrdata .&. 0xF000) `shiftR` 12 
 
 unpackHR2Mode::Word16 -> HRMode
-unpackHR2Mode hrdata = translateHRMode $  (hrdata .&. 0xF00) `shiftR` 8
+unpackHR2Mode hrdata = translateHRMode $ (hrdata .&. 0xF00) `shiftR` 8
 
 unpackMHRMode::Word16 -> HRMode
-unpackMHRMode hrdata = translateHRMode   (hrdata .&. 0xF0)
+unpackMHRMode hrdata = translateHRMode (hrdata .&. 0xF0)
 
 unpackTocoMode :: Word8 -> TOCOMode
 unpackTocoMode tocodata = case tocodata of
@@ -156,6 +168,7 @@ unpackTocoMode tocodata = case tocodata of
                            14 -> UnknownTOCOMode
                            _ -> UnknownTOCOMode
 
+translateHRMode :: (Num a, Eq a) => a -> HRMode
 translateHRMode hrdata = case hrdata of
                            0  -> NoHRTransducer
                            1  -> Inop
@@ -166,7 +179,7 @@ translateHRMode hrdata = case hrdata of
                            10 -> Reserved
                            12 -> Reserved
                            14 -> UnknownHRMode
-                           
+                           _  -> UnknownHRMode
 unpackToco :: Word8 -> TOCO
 unpackToco tocodata = TOCO (fromIntegral tocodata)
 
