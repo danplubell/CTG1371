@@ -18,7 +18,7 @@ import qualified Data.Binary.Strict.Get as G
 
 -- | TODO
 data CTGStatus = CTGStatus { fmpEnabled::Bool        
-                           , htTwinOffsetOn::Bool     
+                           , hrTwinOffsetOn::Bool     
                            , decgLogicOn::Bool
                            , hrCrossChannelVer::Bool
                            , telemetryOn::Bool

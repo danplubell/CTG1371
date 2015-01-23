@@ -4,4 +4,4 @@
 /dist/
 *_flymake.hs
 *.tix
-
+.DS_Store
