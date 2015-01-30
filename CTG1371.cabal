@@ -8,9 +8,9 @@ category:
     -- TODO
     Other
 copyright:
-    2015 Dan Plubell <dplubell@cerner.com>
+    2015 Dan Plubell <danplubell@gmail.com>
 description:
-    TODO: Write a package description.
+    Utilities for encoding and parsing cardiotocography data in the 1371 protocol
 extra-source-files:
     CHANGELOG.md
     CONTRIBUTING.md
@@ -27,7 +27,6 @@ synopsis:
     TODO: Write a package synopsis.
 tested-with:
     GHC == 7.8
-  , GHC == 7.6
 version:
     0.0.0
 
@@ -39,7 +38,9 @@ library
     default-language:
         Haskell2010
     exposed-modules:
+        Data.CTG1371
         Data.CTG1371.Parser
+        Data.CTG1371.Encoder
     ghc-options:
         -Wall
     ghc-prof-options:
@@ -84,10 +85,10 @@ test-suite tests
     main-is:
         Spec.hs
     other-modules:
-        DATA.CTG1371.Parser
-        -- HASKELETON: New.Module
+        Data.CTG1371
+        Data.CTG1371.Encoder
+        Data.CTG1371.Parser
         CTG1371Spec
-        -- HASKELETON: New.ModuleSpec
     type:
         exitcode-stdio-1.0
 

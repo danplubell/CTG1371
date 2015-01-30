@@ -1,5 +1,5 @@
 module Data.CTG1371.Parser (ctgParser
-                           , CTGStatus(..)
+{-                           , CTGStatus(..)
                            , CTGData(..)
                            , SignalQuality(..)
                            , FetalMovement(..)
@@ -9,8 +9,11 @@ module Data.CTG1371.Parser (ctgParser
                            , MHR(..)
                            , TOCO(..)
                            , HRMode(..)
-                           , TOCOMode(..))  where
+                           , TOCOMode(..)
+-}
+                           )  where
 
+import Data.CTG1371
 import Data.Word
 import Data.Bits
 import qualified Data.ByteString as BS
@@ -19,50 +22,6 @@ import qualified Data.Binary.Strict.Get as G
 
 
 -- | TODO
-data CTGStatus = CTGStatus { fmpEnabled::Bool        
-                           , hrTwinOffsetOn::Bool     
-                           , decgLogicOn::Bool
-                           , hrCrossChannelVer::Bool
-                           , telemetryOn::Bool
-                           , fspo2Available::Bool
-                           , ctgDataDeleted::Bool
-                           , ctgDataInserted::Bool
-                           , monitorOn::Bool
-                           } deriving (Show)
-                                      
-data SignalQuality = SignalRed | SignalYellow | SignalGreen deriving (Show)
-
-data FetalMovement = Movement | NoMovement deriving (Show)
-
-data HR = HR { signalQuality::SignalQuality
-             , heartRate::Int
-             } | BlankTrace  deriving (Show)
-
-data HR1 = HR1 { fmp::FetalMovement
-               , hr1::HR  
-               } deriving (Show) 
-
-data HR2 = HR2 { hr2::HR } deriving (Show)
-
-data MHR = MHR { mhr::HR } deriving (Show)
-
-data TOCO = TOCO { tocoRate::Int } deriving (Show)
-
-data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved deriving (Show)
-
-data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode deriving (Show)
-
-data CTGData = CTGData { ctgStatus::CTGStatus
-                       , ctgHR1::[HR1]
-                       , ctgHR2::[HR2]
-                       , ctgMHR::[MHR]
-                       , ctgToco::[TOCO]
-                       , ctgHR1Mode::HRMode
-                       , ctgHR2Mode::HRMode
-                       , ctgMHRMode::HRMode
-                       , ctgTocoMode::TOCOMode
-                       } deriving (Show)
-
 --expose this module
 ctgParser::BS.ByteString -> CTGData
 ctgParser ctgdata =do
@@ -186,20 +145,3 @@ parseStatus status =  CTGStatus
         isctgDataInserted  = testBit status 14
         isMonitorOn        = testBit status 15
 
--- | TODO complete method to encode a CTGData instance into a bytestring 
-
-encodeCTG :: CTGData -> BS.ByteString
-encodeCTG ctgData =  BS.pack [63,0,0,4,40]
-
--- | TODO encodes a 16 bit word into two bytes
-encodeWord16 :: Word16 -> [Word8]
-encodeWord16 x = map fromIntegral [ (x .&. 0xFF00) `shiftR` 8, x .&. 0xFF ]
-
--- | TODO encode a HR (Heart Rate_ as a 16 bit word
-encodeHR :: Word16 -> Bool -> SignalQuality -> Word16
-encodeHR rate movement quality = rate * 4 + calcMovement + calcQuality
-  where calcMovement = if movement then 0x800 else 0
-        calcQuality = case quality of
-                        SignalRed    -> 0
-                        SignalYellow -> 0x2000
-                        SignalGreen  -> 0x4000
