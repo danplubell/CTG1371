@@ -13,8 +13,10 @@ module Data.CTG1371.Parser (ctgParser
 
 import Data.Word
 import Data.Bits
-import Data.ByteString
+import qualified Data.ByteString as BS
 import qualified Data.Binary.Strict.Get as G
+
+
 
 -- | TODO
 data CTGStatus = CTGStatus { fmpEnabled::Bool        
@@ -60,14 +62,9 @@ data CTGData = CTGData { ctgStatus::CTGStatus
                        , ctgMHRMode::HRMode
                        , ctgTocoMode::TOCOMode
                        } deriving (Show)
---testData::ByteString                                  
---testData = pack [66, -128, 32, 65, 104, 65, 104, 65, 104, 65, 104, 66, 40, 66, 40, 66, 40, 66, 40, 65, -32, 65, -32, 65, -32, 65, -32, 4, 4, 4, 4, 34, 96, 10, 0]
---testData = pack [67, -128, 0, 33, 91, 33, 91, 33, 91, 33, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 2, 0, 0]
---testParse::IO()
---testParse = print $ ctgParser testData
 
 --expose this module
-ctgParser::ByteString -> CTGData
+ctgParser::BS.ByteString -> CTGData
 ctgParser ctgdata =do
   let (parsedData,_)  = G.runGet parseCTG ctgdata
   case parsedData of
@@ -112,37 +109,6 @@ parseCTG = do
             [tocoBlock1,tocoBlock2,tocoBlock3,tocoBlock4]
             hr1Mode hr2Mode mhrMode tocoMode)
 
-{-
-dumpCTG::G.Get (Int,Int,Int,Int,Int,Int,Int)
-dumpCTG = do
-  _ <- G.getWord8
-  status <- fmap fromIntegral G.getWord16be
-  hr1Block4 <- fmap fromIntegral G.getWord16be 
-  hr1Block3 <- fmap fromIntegral G.getWord16be
-  hr1Block2 <- fmap fromIntegral G.getWord16be
-  hr1Block1 <- fmap fromIntegral G.getWord16be
-  hr2Block4 <- fmap fromIntegral G.getWord16be
-  hr2Block3 <- fmap fromIntegral G.getWord16be
-  hr2Block2 <- fmap fromIntegral G.getWord16be
-  hr2Block1 <- fmap fromIntegral G.getWord16be
-
-  mhrBlock4 <- fmap fromIntegral G.getWord16be
-  mhrBlock3 <- fmap fromIntegral G.getWord16be
-  mhrBlock2 <- fmap fromIntegral G.getWord16be
-  mhrBlock1 <- fmap fromIntegral G.getWord16be
-
-  tocoBlock4 <- fmap fromIntegral G.getWord8
-  tocoBlock3 <- fmap fromIntegral G.getWord8
-  tocoBlock2 <- fmap fromIntegral G.getWord8
-  tocoBlock1 <- fmap fromIntegral G.getWord8
-
-  hrMode <- fmap fromIntegral G.getWord16be
-  tocoMode <- fmap fromIntegral G.getWord8
-  
-  return (status,hr1Block4,hr1Block3,hr1Block2,hr1Block1,hr2Block4,hrMode)
-
-runDump =  print $ G.runGet dumpCTG testData
--}             
 --unpack an hr block
 unpackHR1:: Word16 -> HR1
 unpackHR1 hrdata = HR1 checkFetalMovement (unpackHR hrdata)
@@ -180,6 +146,7 @@ translateHRMode hrdata = case hrdata of
                            12 -> Reserved
                            14 -> UnknownHRMode
                            _  -> UnknownHRMode
+
 unpackToco :: Word8 -> TOCO
 unpackToco tocodata = TOCO (fromIntegral tocodata)
 
@@ -218,3 +185,21 @@ parseStatus status =  CTGStatus
         isctgDataDeleted   = testBit status 13
         isctgDataInserted  = testBit status 14
         isMonitorOn        = testBit status 15
+
+-- | TODO complete method to encode a CTGData instance into a bytestring 
+
+encodeCTG :: CTGData -> BS.ByteString
+encodeCTG ctgData =  BS.pack [63,0,0,4,40]
+
+-- | TODO encodes a 16 bit word into two bytes
+encodeWord16 :: Word16 -> [Word8]
+encodeWord16 x = map fromIntegral [ (x .&. 0xFF00) `shiftR` 8, x .&. 0xFF ]
+
+-- | TODO encode a HR (Heart Rate_ as a 16 bit word
+encodeHR :: Word16 -> Bool -> SignalQuality -> Word16
+encodeHR rate movement quality = rate * 4 + calcMovement + calcQuality
+  where calcMovement = if movement then 0x800 else 0
+        calcQuality = case quality of
+                        SignalRed    -> 0
+                        SignalYellow -> 0x2000
+                        SignalGreen  -> 0x4000

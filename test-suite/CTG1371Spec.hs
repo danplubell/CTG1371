@@ -1,5 +1,6 @@
 module CTG1371Spec (spec) where
 
+
 import Data.CTG1371.Parser
 import Control.Exception (evaluate)
 import Data.ByteString
@@ -69,7 +70,18 @@ spec =
         it "Monitor On is disabled" $ do
             monitorOn (ctgStatus ( ctgParser testDataAllOff)) `shouldBe` False
 
+        it "HR is equal" $ do
+            buildHR 0 False SignalRed `shouldBe` 0 
 
+buildHR ::Int -> Bool -> SignalQuality -> Int
+buildHR rate movement quality = rate * 4 + calcMovement + calcQuality
+  where calcMovement = if movement then 0x800 else 0
+        calcQuality = case quality of
+                        SignalRed    -> 0
+                        SignalYellow -> 0x2000
+                        SignalGreen  -> 0x4000
+--                        _            -> 0
+  
 testDataMonitorOn::ByteString
 testDataMonitorOn =  pack [0x43, 0x80 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
