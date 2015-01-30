@@ -13,7 +13,7 @@ encodeCTG _ =  BS.pack [63,0,0,4,40]
 
 -- | TODO encodes a 16 bit word into two bytes
 encodeWord16 :: Word16 -> [Word8]
-encodeWord16 x = map fromIntegral [ (x .&. 0xFF00) `shiftR` 8, x .&. 0xFF ]
+encodeWord16 x = fmap fromIntegral [ (x .&. 0xFF00) `shiftR` 8, x .&. 0xFF ]
 
 -- | TODO encode a HR (Heart Rate_ as a 16 bit word
 encodeHR :: Word16 -> Bool -> SignalQuality -> Word16
