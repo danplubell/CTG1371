@@ -53,5 +53,5 @@ data CTGData = CTGData { ctgStatus::CTGStatus
                        , ctgHR2Mode::HRMode
                        , ctgMHRMode::HRMode
                        , ctgTocoMode::TOCOMode
-                       } deriving (Show)
+                       }  deriving (Show)
 

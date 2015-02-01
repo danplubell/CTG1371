@@ -1,24 +1,11 @@
-module Data.CTG1371.Parser (ctgParser
-{-                           , CTGStatus(..)
-                           , CTGData(..)
-                           , SignalQuality(..)
-                           , FetalMovement(..)
-                           , HR(..)
-                           , HR1(..)
-                           , HR2(..)
-                           , MHR(..)
-                           , TOCO(..)
-                           , HRMode(..)
-                           , TOCOMode(..)
--}
-                           )  where
+module Data.CTG1371.Parser (ctgParser)  where
 
 import Data.CTG1371
 import Data.Word
 import Data.Bits
 import qualified Data.ByteString as BS
 import qualified Data.Binary.Strict.Get as G
-
+import Data.Monoid
 
 
 -- | TODO
@@ -27,7 +14,7 @@ ctgParser::BS.ByteString -> CTGData
 ctgParser ctgdata =do
   let (parsedData,_)  = G.runGet parseCTG ctgdata
   case parsedData of
-    Left errMsg -> error $ "ctgParseError: " ++ errMsg
+    Left errMsg -> error  "ctgParseError: " (mappend errMsg)
     Right x -> x
 
 --function used by runget to parse the data
