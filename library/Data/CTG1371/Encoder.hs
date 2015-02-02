@@ -14,10 +14,24 @@ encodeCTG ctgData =  P.runPut (buildCTGByteString ctgData)
 
 buildCTGByteString :: CTGData -> P.Put
 buildCTGByteString  ctgData = 
-  P.putByteString $ encodeCTGStatus $ ctgStatus ctgData  
+  P.putByteString $ encodeCTGStatus ctgData  
 
-encodeCTGStatus :: CTGStatus -> BS.ByteString
-encodeCTGStatus  = undefined
+encodeCTGStatus :: CTGData -> BS.ByteString
+encodeCTGStatus ctgdata  = BS.pack [firstWord,secondWord]
+  where firstWord = packWord8 ( getMonitorOnStatus ctgdata
+                               , getDataInsertedStatus ctgdata
+                               , getDataDeletedStatus ctgdata
+                               , False
+                               , getFSPO2AvailableStatus ctgdata
+                               , False
+                               , getTelemetryStatus ctgdata
+                               , getHRCrossChannelStatus ctgdata)
+        secondWord = packWord8 (True,True,True,True,True,True,True,True)
+
+packWord8 :: (Bool, Bool,Bool,Bool,Bool,Bool,Bool,Bool) -> Word8
+packWord8  (a, b, c, d, e, f, g, h) = z h 1 .|. z g 2 .|. z f 4 .|. z e 8 .|. z d 16 .|. z c 32 .|. z b 64 .|. z a 128
+  where z False _ = 0
+        z True  n = n
 
 encodeHR1 :: [HR1] -> BS.ByteString
 encodeHR1 = undefined
@@ -45,6 +59,7 @@ encodeHR rate movement quality = rate * 4 + calcMovement + calcQuality
                         SignalRed    -> 0
                         SignalYellow -> 0x2000
                         SignalGreen  -> 0x4000
+                        
 
 -- | TODO encodes a 16 bit word into two bytes
 encodeWord16 :: Word16 -> [Word8]
