@@ -40,6 +40,7 @@ module Data.CTG1371 (getFMPStatus
                      , HRMode(..)
                      , TOCOMode(..)) where
 import Data.Label
+import Data.Word
 
 -- | Values from the status block of CTG data
 data CTGStatus = CTGStatus { _fmpEnabled::Bool        
@@ -59,11 +60,11 @@ mkLabels [''CTGStatus]
 data SignalQuality = SignalRed | SignalYellow | SignalGreen deriving (Show)
 
 -- | Represents the symbolic value of the fetal movement indicator
-data FetalMovement = Movement | NoMovement deriving (Show)
+data FetalMovement = Movement | NoMovement | NullMovement deriving (Show,Eq)
 
 -- | Represents a single heart rate value
 data HR = HR { _signalQuality::SignalQuality
-             , _heartRate::Int
+             , _heartRate::Word16
              , _blankTrace::Bool
              }  deriving (Show)
 
@@ -74,7 +75,7 @@ getSignalQuality :: HR -> SignalQuality
 getSignalQuality = get signalQuality
 
 -- | Get the heart rate value
-getHeartRate :: HR -> Int
+getHeartRate :: HR -> Word16
 getHeartRate = get heartRate
 
 getBlankTraceInd :: HR -> Bool
@@ -95,7 +96,7 @@ getHR1SignalQuality :: HR1 -> SignalQuality
 getHR1SignalQuality hr1data = get signalQuality $ get hr1 hr1data 
 
 -- | Gets the heart value from a first heart heart value
-getHR1HeartRate :: HR1 -> Int
+getHR1HeartRate :: HR1 -> Word16
 getHR1HeartRate hr1data = get heartRate $ get hr1 hr1data
 
 
@@ -108,7 +109,7 @@ getHR2SignalQuality :: HR2 -> SignalQuality
 getHR2SignalQuality hr2data = get signalQuality $ get hr2 hr2data
 
 -- | Get the heart rate from a second heart rate value
-getHR2HeartRate :: HR2 -> Int
+getHR2HeartRate :: HR2 -> Word16
 getHR2HeartRate hr2data = get heartRate $ get hr2 hr2data
 
 -- | Represents the maternal heart rate
@@ -121,15 +122,15 @@ getMHRSignalQuality :: MHR -> SignalQuality
 getMHRSignalQuality mhrdata = get signalQuality $ get mhr mhrdata
 
 -- | Get the heart rate value from a maternal heart rate value
-getMHRHeartRate :: MHR -> Int
+getMHRHeartRate :: MHR -> Word16
 getMHRHeartRate mhrdata = get heartRate $ get mhr mhrdata
 
 -- | Represents a tocography value
-data TOCO = TOCO { _tocoRate::Int } deriving (Show)
+data TOCO = TOCO { _tocoRate::Word8 } deriving (Show)
 mkLabels [''TOCO]
 
 -- | Gets the tocography rate from a tocography value
-getTOCORate :: TOCO -> Int
+getTOCORate :: TOCO -> Word8
 getTOCORate  = get tocoRate 
 
 -- | Represents the possible heart rate modes
