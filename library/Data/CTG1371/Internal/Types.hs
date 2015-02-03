@@ -1,5 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Data.CTG1371 (getFMPStatus
+module Data.CTG1371.Internal.Types (
+                       getFMPStatus
                      , getHRTwinOffsetStatus
                      , getDECGLogicStatus
                      , getHRCrossChannelStatus
@@ -134,10 +135,10 @@ getTOCORate :: TOCO -> Word8
 getTOCORate  = get tocoRate 
 
 -- | Represents the possible heart rate modes
-data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved deriving (Show)
+data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved1 | Reserved2 | NullHRMode  deriving (Show)
 
 -- | Represents the possible tocography modes
-data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode deriving (Show)
+data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode | NullTOCOMode  deriving (Show)
 
 data CTGData = CTGData { _ctgStatus::CTGStatus
                        , _ctgHR1::[HR1]
@@ -191,6 +192,7 @@ getTOCOMode = get ctgTocoMode
 -- | Get the FMP status
 getFMPStatus :: CTGData -> Bool
 getFMPStatus  ctgData = get fmpEnabled $  getCTGStatus ctgData
+
 -- | Get the heart rate twin offset status
 getHRTwinOffsetStatus :: CTGData -> Bool
 getHRTwinOffsetStatus  ctgData = get hrTwinOffsetOn $ getCTGStatus ctgData

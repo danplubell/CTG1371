@@ -41,9 +41,12 @@ library
     default-language:
         Haskell2010
     exposed-modules:
-        Data.CTG1371
         Data.CTG1371.Parser
         Data.CTG1371.Encoder
+    other-modules:
+        Data.CTG1371.Internal.Encoder.Encoders
+        Data.CTG1371.Internal.Types
+        Data.CTG1371.Internal.Parser.Parsers
     ghc-options:
         -Wall
     ghc-prof-options:
