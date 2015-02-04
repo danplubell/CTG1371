@@ -1,7 +1,8 @@
 module CTG1371Spec (spec) where
 
-
-import Data.CTG1371
+import Data.CTG1371.Internal.Encoder.Encoders
+import Data.CTG1371.Internal.Parser.Parsers
+import Data.CTG1371.Encoder
 import Data.CTG1371.Parser
 import Control.Exception (evaluate)
 import Data.ByteString

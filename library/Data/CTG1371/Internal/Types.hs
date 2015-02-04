@@ -18,11 +18,18 @@ module Data.CTG1371.Internal.Types (
                      , getMHRMode
                      , getTOCOMode
                      , getSignalQuality
+                     , setSignalQuality
                      , getHeartRate
+                     , setHeartRate
                      , getBlankTraceInd
+                     , setBlankTraceInd
                      , getHR1SignalQuality
+                     , setHR1SignalQuality
                      , getHR1HeartRate
+                     , setHR1HeartRate
                      , getHR1FetalMovement
+                     , setHR1FetalMovement
+                     , buildHR1
                      , getHR2SignalQuality
                      , getHR2HeartRate
                      , getMHRSignalQuality
@@ -40,8 +47,11 @@ module Data.CTG1371.Internal.Types (
                      , TOCO(..)
                      , HRMode(..)
                      , TOCOMode(..)) where
+import Prelude hiding (id, (.), mod)
 import Data.Label
 import Data.Word
+import Control.Category
+
 
 -- | Values from the status block of CTG data
 data CTGStatus = CTGStatus { _fmpEnabled::Bool        
@@ -75,12 +85,25 @@ mkLabels [''HR]
 getSignalQuality :: HR -> SignalQuality
 getSignalQuality = get signalQuality
 
+-- | Set the Signal Quality for a heart rate value
+setSignalQuality :: SignalQuality->HR->HR
+setSignalQuality = set signalQuality
+
 -- | Get the heart rate value
 getHeartRate :: HR -> Word16
 getHeartRate = get heartRate
 
+-- | Set the heart rate value
+setHeartRate :: Word16 -> HR -> HR
+setHeartRate = set heartRate
+
+-- | Get the blank trace indicator
 getBlankTraceInd :: HR -> Bool
 getBlankTraceInd = get blankTrace
+
+-- | Set the blank trace indicator
+setBlankTraceInd :: Bool -> HR -> HR
+setBlankTraceInd = set blankTrace
 
 -- | Represents the first heart rate value
 data HR1 = HR1 { _fmp::FetalMovement
@@ -88,19 +111,34 @@ data HR1 = HR1 { _fmp::FetalMovement
                } deriving (Show) 
 mkLabels [''HR1]
 
--- | Gets the fetal movement value from a first heart value
+-- | Gets the fetal movement value from a first heart rate value
 getHR1FetalMovement :: HR1 -> FetalMovement
 getHR1FetalMovement = get fmp
 
--- | Gets the signal quality value from a first heart value
+-- | Set the fetal movement value for the first heart rate value
+setHR1FetalMovement :: FetalMovement -> HR1 -> HR1
+setHR1FetalMovement = set fmp
+
+-- | Gets the signal quality value from a first heart rate value
 getHR1SignalQuality :: HR1 -> SignalQuality
 getHR1SignalQuality hr1data = get signalQuality $ get hr1 hr1data 
 
--- | Gets the heart value from a first heart heart value
+-- | set the signal quality value for the first heart rate value
+setHR1SignalQuality :: SignalQuality->HR1->HR1
+setHR1SignalQuality = set (signalQuality.hr1)
+
+-- | Gets the heart value from a first heart rate value
 getHR1HeartRate :: HR1 -> Word16
 getHR1HeartRate hr1data = get heartRate $ get hr1 hr1data
+-- | Set the heart rate for the first heart rate value
 
+setHR1HeartRate :: Word16 -> HR1 -> HR1
+setHR1HeartRate = set (heartRate.hr1)
 
+-- | Build an HR1 value
+buildHR1 :: FetalMovement -> SignalQuality -> Word16 -> Bool -> HR1
+buildHR1 fm sq hr bt =
+  HR1 fm (HR sq hr bt)
 -- | Represents a second heart rate
 data HR2 = HR2 { _hr2::HR } deriving (Show)
 mkLabels [''HR2]
