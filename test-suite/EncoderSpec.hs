@@ -43,4 +43,36 @@ spec = describe "Test Encoder Internal Functions" $ do
                       ,( buildHR1 NoMovement SignalRed 102 False)
                       ,( buildHR1 NoMovement SignalRed 103 False)
                      ] `shouldBe` BS.pack [1,156,1,152,1,148,1,144]
+
+         it "test packHR2 for hr = 256 Yellow signal quality" $ do
+           packHR2 (buildHR2 SignalYellow 256 False) [] `shouldBe` [36, 0]
+
+         it "test packHR2 for hr = 100 Green signal quality" $ do
+           packHR2 (buildHR2 SignalGreen 100 False) [] `shouldBe` [65,144]
+
+         it "test encodeHR2 for the correct order of HR values" $ do
+           encodeHR2 [ ( buildHR2 SignalRed 100 False)
+                      ,( buildHR2 SignalRed 101 False)
+                      ,( buildHR2 SignalRed 102 False)
+                      ,( buildHR2 SignalRed 103 False)
+                     ] `shouldBe` BS.pack [1,156,1,152,1,148,1,144]
+
+         it "test packMHR for hr = 256 Yellow signal quality" $ do
+           packMHR (buildMHR SignalYellow 256 False) [] `shouldBe` [36, 0]
+
+         it "test packMHR for hr = 100 Green signal quality" $ do
+           packMHR (buildMHR SignalGreen 100 False) [] `shouldBe` [65,144]
+
+         it "test encodeMHR for the correct order of HR values" $ do
+           encodeMHR [ ( buildMHR SignalRed 100 False)
+                      ,( buildMHR SignalRed 101 False)
+                      ,( buildMHR SignalRed 102 False)
+                      ,( buildMHR SignalRed 103 False)
+                     ] `shouldBe` BS.pack [1,156,1,152,1,148,1,144]
+           
+
+           
+
          
+           
+          

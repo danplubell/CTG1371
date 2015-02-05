@@ -32,10 +32,13 @@ module Data.CTG1371.Internal.Types (
                      , buildHR1
                      , getHR2SignalQuality
                      , getHR2HeartRate
+                     , buildHR2 
                      , getMHRSignalQuality
                      , getMHRHeartRate
+                     , buildMHR
                      , getTOCORate
                      , getCTGStatus
+                     , buildTOCO
                      , CTGData(..)
                      , CTGStatus(..)
                      , SignalQuality(..)
@@ -137,8 +140,7 @@ setHR1HeartRate = set (heartRate.hr1)
 
 -- | Build an HR1 value
 buildHR1 :: FetalMovement -> SignalQuality -> Word16 -> Bool -> HR1
-buildHR1 fm sq hr bt =
-  HR1 fm (HR sq hr bt)
+buildHR1 fm sq hr bt = HR1 fm (HR sq hr bt)
 -- | Represents a second heart rate
 data HR2 = HR2 { _hr2::HR } deriving (Show)
 mkLabels [''HR2]
@@ -150,6 +152,9 @@ getHR2SignalQuality hr2data = get signalQuality $ get hr2 hr2data
 -- | Get the heart rate from a second heart rate value
 getHR2HeartRate :: HR2 -> Word16
 getHR2HeartRate hr2data = get heartRate $ get hr2 hr2data
+
+buildHR2 :: SignalQuality->Word16 -> Bool -> HR2
+buildHR2 sq hr bt = HR2 (HR sq hr bt)
 
 -- | Represents the maternal heart rate
 data MHR = MHR { _mhr::HR } deriving (Show)
@@ -164,6 +169,9 @@ getMHRSignalQuality mhrdata = get signalQuality $ get mhr mhrdata
 getMHRHeartRate :: MHR -> Word16
 getMHRHeartRate mhrdata = get heartRate $ get mhr mhrdata
 
+buildMHR :: SignalQuality -> Word16 -> Bool ->  MHR
+buildMHR sq hr bt = MHR(HR sq hr bt)
+
 -- | Represents a tocography value
 data TOCO = TOCO { _tocoRate::Word8 } deriving (Show)
 mkLabels [''TOCO]
@@ -171,6 +179,9 @@ mkLabels [''TOCO]
 -- | Gets the tocography rate from a tocography value
 getTOCORate :: TOCO -> Word8
 getTOCORate  = get tocoRate 
+
+buildTOCO :: Word8 -> TOCO
+buildTOCO tr = TOCO tr
 
 -- | Represents the possible heart rate modes
 data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved1 | Reserved2 | NullHRMode  deriving (Show)
