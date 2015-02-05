@@ -79,6 +79,20 @@ spec = describe "Test Encoder Internal Functions" $ do
                        ,buildTOCO 102
                        ,buildTOCO 103
                       ] `shouldBe` BS.pack [103,102,101,100]
+
+         it "test encodeHRModes with HR1 HRMode of NoHRTransducer" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer NoHRTransducer `shouldBe` BS.pack [0,0]
+
+         it "test encodeHRModes with HR1 HRMode of Inop" $ do
+           encodeHRModes Inop NoHRTransducer NoHRTransducer `shouldBe` BS.pack [16,0]
+
+         it "test encodeHRModes with HR1 HRMode of US" $ do
+           encodeHRModes US NoHRTransducer NoHRTransducer `shouldBe` BS.pack [32,0]
+
+         it "test encodeHRModes with HR1 HRMode of DECG" $ do
+           encodeHRModes DECG NoHRTransducer NoHRTransducer `shouldBe` BS.pack [64,0]
+
+                                                             
         
            
 
