@@ -69,8 +69,17 @@ spec = describe "Test Encoder Internal Functions" $ do
                       ,( buildMHR SignalRed 102 False)
                       ,( buildMHR SignalRed 103 False)
                      ] `shouldBe` BS.pack [1,156,1,152,1,148,1,144]
-           
 
+         it "test packTOCO for toco rate of 100" $ do
+             packTOCO (buildTOCO 100) [] `shouldBe` [100]
+
+         it "test encodeTOCO for toco rates in correct order" $ do
+           encodeTOCO [ buildTOCO 100
+                       ,buildTOCO 101
+                       ,buildTOCO 102
+                       ,buildTOCO 103
+                      ] `shouldBe` BS.pack [103,102,101,100]
+        
            
 
          
