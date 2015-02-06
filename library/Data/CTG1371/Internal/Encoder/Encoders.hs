@@ -10,7 +10,7 @@ import qualified Data.Binary.Put as P
 buildCTGByteString :: CTGData -> P.Put
 buildCTGByteString  ctgData = do
   P.putWord8 67 -- 'C' indicates a 'C' data block
-  P.putByteString $ encodeCTGStatus ctgData
+  P.putByteString $ encodeCTGStatus $ getCTGStatus ctgData
   P.putByteString $ encodeHR1 $ getHR1 ctgData
   P.putByteString $ encodeHR2 $ getHR2 ctgData
   P.putByteString $ encodeMHR $ getMHR ctgData
@@ -19,24 +19,24 @@ buildCTGByteString  ctgData = do
   P.putByteString $ encodeTOCOMode $ getTOCOMode ctgData
   
 -- | Encode the CTG status into the ByteString.  The status indicators are stored in two 8 bit words
-encodeCTGStatus :: CTGData -> BS.ByteString
-encodeCTGStatus ctgdata  = BS.pack [firstWord,secondWord]
-  where firstWord = packWord8 (  getMonitorOnStatus ctgdata
-                               , getDataInsertedStatus ctgdata
-                               , getDataDeletedStatus ctgdata
+encodeCTGStatus :: CTGStatus -> BS.ByteString
+encodeCTGStatus ctgstatus  = BS.pack [firstWord,secondWord]
+  where firstWord = packWord8 (  getMonitorOnStatus ctgstatus
+                               , getDataInsertedStatus ctgstatus
+                               , getDataDeletedStatus ctgstatus
                                , False
-                               , getFSPO2AvailableStatus ctgdata
+                               , getFSPO2AvailableStatus ctgstatus
                                , False
-                               , getTelemetryStatus ctgdata
-                               , getHRCrossChannelStatus ctgdata)
+                               , getTelemetryStatus ctgstatus
+                               , getHRCrossChannelStatus ctgstatus)
         secondWord = packWord8 ( False
                                , False
-                               , getDECGLogicStatus ctgdata
+                               , getDECGLogicStatus ctgstatus
                                , False
                                , False
                                , False
-                               , getHRTwinOffsetStatus ctgdata
-                               , getFMPStatus ctgdata)
+                               , getHRTwinOffsetStatus ctgstatus
+                               , getFMPStatus ctgstatus)
 
 -- | Pack a string of Bool values into a Word8
 packWord8 :: (Bool, Bool,Bool,Bool,Bool,Bool,Bool,Bool) -> Word8
@@ -92,7 +92,7 @@ packTOCO toco acc = acc ++ [getTOCORate toco]
 encodeHRModes :: HRMode->HRMode->HRMode -> BS.ByteString
 encodeHRModes hr1Mode hr2Mode mhrMode = BS.pack $ encodeWord16 (translateHRMode hr1Mode `shiftL` 12
                                                                .|. translateHRMode hr2Mode `shiftL` 8
-                                                               .|. translateHRMode mhrMode)
+                                                               .|. translateHRMode mhrMode `shiftL` 4)
                                                                
   where translateHRMode hrMode= case hrMode of
           NoHRTransducer -> 0
@@ -102,9 +102,9 @@ encodeHRModes hr1Mode hr2Mode mhrMode = BS.pack $ encodeWord16 (translateHRMode 
           MECG           -> 6
           ExternalMRH    -> 8
           Reserved1      -> 10
-          Reserved2      -> 11
+          Reserved2      -> 12
           UnknownHRMode  -> 14
-          NullHRMode     -> 0xf 
+          NullHRMode     -> 0 
 -- | Encode the toco mode into a ByteString                                  
 encodeTOCOMode :: TOCOMode -> BS.ByteString
 encodeTOCOMode tocoMode = BS.pack  [translateTOCOMode]
@@ -113,7 +113,7 @@ encodeTOCOMode tocoMode = BS.pack  [translateTOCOMode]
           ExternalTOCO     -> 8
           IUP              -> 10
           UnknownTOCOMode  -> 14
-          NullTOCOMode       -> 0xF 
+          NullTOCOMode     -> 0 
 
 -- | Encode a HR (Heart Rate as a 16 bit word)
 encodeHR :: Word16 -> FetalMovement -> SignalQuality -> Word16

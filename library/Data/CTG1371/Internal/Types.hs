@@ -9,6 +9,7 @@ module Data.CTG1371.Internal.Types (
                      , getDataDeletedStatus
                      , getDataInsertedStatus
                      , getMonitorOnStatus
+                     , setMonitorOn
                      , getHR1
                      , getHR2
                      , getMHR
@@ -55,20 +56,22 @@ import Data.Label
 import Data.Word
 import Control.Category
 
-
 -- | Values from the status block of CTG data
-data CTGStatus = CTGStatus { _fmpEnabled::Bool        
-                           , _hrTwinOffsetOn::Bool     
-                           , _decgLogicOn::Bool
-                           , _hrCrossChannelVer::Bool
-                           , _telemetryOn::Bool
-                           , _fspo2Available::Bool
+data CTGStatus = CTGStatus { _monitorOn::Bool
+                           , _ctgDataInserted::Bool        
                            , _ctgDataDeleted::Bool
-                           , _ctgDataInserted::Bool
-                           , _monitorOn::Bool
+                           , _fspo2Available::Bool
+                           , _telemetryOn::Bool
+                           , _hrCrossChannelVer::Bool
+                           , _decgLogicOn::Bool
+                           , _hrTwinOffsetOn::Bool     
+                           , _fmpEnabled::Bool
                            } deriving (Show)
 
 mkLabels [''CTGStatus]
+
+setMonitorOn :: Bool -> CTGStatus -> CTGStatus
+setMonitorOn = set monitorOn
 
 -- | Represents the symbolic value of the signal quality
 data SignalQuality = SignalRed | SignalYellow | SignalGreen deriving (Show)
@@ -181,7 +184,7 @@ getTOCORate :: TOCO -> Word8
 getTOCORate  = get tocoRate 
 
 buildTOCO :: Word8 -> TOCO
-buildTOCO tr = TOCO tr
+buildTOCO  = TOCO 
 
 -- | Represents the possible heart rate modes
 data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved1 | Reserved2 | NullHRMode  deriving (Show)
@@ -239,38 +242,38 @@ getTOCOMode :: CTGData -> TOCOMode
 getTOCOMode = get ctgTocoMode
 
 -- | Get the FMP status
-getFMPStatus :: CTGData -> Bool
-getFMPStatus  ctgData = get fmpEnabled $  getCTGStatus ctgData
+getFMPStatus :: CTGStatus -> Bool
+getFMPStatus  = get fmpEnabled 
 
 -- | Get the heart rate twin offset status
-getHRTwinOffsetStatus :: CTGData -> Bool
-getHRTwinOffsetStatus  ctgData = get hrTwinOffsetOn $ getCTGStatus ctgData
+getHRTwinOffsetStatus :: CTGStatus -> Bool
+getHRTwinOffsetStatus  = get hrTwinOffsetOn
 
 -- | Get the DECG logic status
-getDECGLogicStatus::CTGData -> Bool
-getDECGLogicStatus ctgData  = get decgLogicOn $  getCTGStatus ctgData
+getDECGLogicStatus::CTGStatus -> Bool
+getDECGLogicStatus = get decgLogicOn
 
 -- | Get the heart rate cross channel verification status
-getHRCrossChannelStatus :: CTGData -> Bool
-getHRCrossChannelStatus ctgData  = get hrCrossChannelVer $  getCTGStatus ctgData
+getHRCrossChannelStatus :: CTGStatus -> Bool
+getHRCrossChannelStatus = get hrCrossChannelVer
 
 -- | Get the telemetry status
-getTelemetryStatus :: CTGData -> Bool
-getTelemetryStatus ctgData  = get telemetryOn $  getCTGStatus ctgData
+getTelemetryStatus :: CTGStatus -> Bool
+getTelemetryStatus = get telemetryOn
 
 -- | Get the FSPO2 status 
-getFSPO2AvailableStatus :: CTGData -> Bool
-getFSPO2AvailableStatus ctgData  = get fspo2Available $  getCTGStatus ctgData
+getFSPO2AvailableStatus :: CTGStatus -> Bool
+getFSPO2AvailableStatus = get fspo2Available
 
 -- | Get the data deleted status
-getDataDeletedStatus :: CTGData -> Bool
-getDataDeletedStatus ctgData  = get ctgDataDeleted $  getCTGStatus ctgData
+getDataDeletedStatus :: CTGStatus -> Bool
+getDataDeletedStatus = get ctgDataDeleted
 
 -- | Get the data inserted status
-getDataInsertedStatus :: CTGData -> Bool
-getDataInsertedStatus ctgData = get ctgDataInserted $  getCTGStatus ctgData
+getDataInsertedStatus :: CTGStatus -> Bool
+getDataInsertedStatus = get ctgDataInserted
 
 -- | Get the monitor on status
-getMonitorOnStatus :: CTGData -> Bool
-getMonitorOnStatus ctgData  = get monitorOn $  getCTGStatus ctgData
+getMonitorOnStatus :: CTGStatus -> Bool
+getMonitorOnStatus = get monitorOn 
 

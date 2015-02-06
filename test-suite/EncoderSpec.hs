@@ -92,10 +92,57 @@ spec = describe "Test Encoder Internal Functions" $ do
          it "test encodeHRModes with HR1 HRMode of DECG" $ do
            encodeHRModes DECG NoHRTransducer NoHRTransducer `shouldBe` BS.pack [64,0]
 
-                                                             
-        
+         it "test encodeHRModes with HR1 HRMode of Reserved2" $ do
+           encodeHRModes Reserved2 NoHRTransducer NoHRTransducer `shouldBe` BS.pack [192,0]
+
+         it "test encodeHRModes with HR1 HRMode of UnknownHRMode" $ do
+           encodeHRModes UnknownHRMode NoHRTransducer NoHRTransducer `shouldBe` BS.pack [224,0]
+
+         it "test encodeHRModes with HR2 HRMode of NoHRTransducer" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer NoHRTransducer `shouldBe` BS.pack [0,0]
+
+         it "test encodeHRModes with HR2 HRMode of Inop" $ do
+           encodeHRModes  NoHRTransducer Inop NoHRTransducer `shouldBe` BS.pack [1,0]
+
+         it "test encodeHRModes with HR2 HRMode of US" $ do
+           encodeHRModes NoHRTransducer US NoHRTransducer `shouldBe` BS.pack [2,0]
+
+         it "test encodeHRModes with HR2 HRMode of DECG" $ do
+           encodeHRModes NoHRTransducer DECG NoHRTransducer `shouldBe` BS.pack [4,0]
+
+         it "test encodeHRModes with HR2 HRMode of Reserved2" $ do
+           encodeHRModes NoHRTransducer Reserved2  NoHRTransducer `shouldBe` BS.pack [12,0]
+
+         it "test encodeHRModes with HR2 HRMode of UnknownHRMode" $ do
+           encodeHRModes NoHRTransducer UnknownHRMode NoHRTransducer `shouldBe` BS.pack [14,0]
+
+         it "test encodeHRModes with MHR HRMode of NoHRTransducer" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer NoHRTransducer `shouldBe` BS.pack [0,0]
+
+         it "test encodeHRModes with MHR HRMode of Inop" $ do
+           encodeHRModes  NoHRTransducer NoHRTransducer Inop `shouldBe` BS.pack [0,16]
+
+         it "test encodeHRModes with MHR HRMode of MECG" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer MECG `shouldBe` BS.pack [0,96]
+
+         it "test encodeHRModes with MHR HRMode of ExternalMRH" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer ExternalMRH `shouldBe` BS.pack [0,128]
+
+         it "test encodeHRModes with HR2 HRMode of Reserved1" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer Reserved1 `shouldBe` BS.pack [0,160]
+
+         it "test encodeHRModes with HR2 HRMode of Reserved2" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer Reserved2 `shouldBe` BS.pack [0,192]
+
+         it "test encodeHRModes with HR2 HRMode of UnknownHRMode" $ do
+           encodeHRModes NoHRTransducer NoHRTransducer UnknownHRMode `shouldBe` BS.pack [0,224]
+
+         it "test encodeCTGStatus with MonitorStatus set" $ do
+           encodeCTGStatus (setMonitorOn True ctgStatus) 
+                            `shouldBe` BS.pack [128,0]
+
            
 
-         
-           
+ctgStatus :: CTGStatus         
+ctgStatus = CTGStatus False False False False False False False False False           
           
