@@ -46,10 +46,10 @@ parseCTG = do
 -- | Unpack the first heart rate value 
 unpackHR1:: Word16 -> HR1
 unpackHR1 hrdata = HR1 checkFetalMovement (unpackHR hrdata)
-  where checkFetalMovement = if testBit hrdata 12 then Movement else NoMovement
+  where checkFetalMovement = if testBit hrdata 11  then Movement else NoMovement
 
 -- | Unpack the heart rate mode values
-unpackHRMode :: Word16 -> (HRMode,HRMode,HRMode)
+unpackHRMode :: Word16 -> (HRMode,HRMode,MHRMode)
 unpackHRMode hrdata = (unpackHR1Mode hrdata,unpackHR2Mode hrdata,unpackMHRMode hrdata)
 
 -- | Unpack the first heart rate mode 
@@ -61,8 +61,8 @@ unpackHR2Mode::Word16 -> HRMode
 unpackHR2Mode hrdata = translateHRMode $ (hrdata .&. 0xF00) `shiftR` 8
 
 -- | Unpack the maternal heart rate mode
-unpackMHRMode::Word16 -> HRMode
-unpackMHRMode hrdata = translateHRMode (hrdata .&. 0xF0)
+unpackMHRMode::Word16 -> MHRMode
+unpackMHRMode hrdata = translateMHRMode $  (hrdata .&. 0xF0) `shiftR` 4
 
 
 -- | Unpack the tocography mode
@@ -81,12 +81,20 @@ translateHRMode hrdata = case hrdata of
                            1  -> Inop
                            2  -> US
                            4  -> DECG
-                           6  -> MECG
-                           8  -> ExternalMRH
-                           10 -> Reserved1
                            12 -> Reserved2
                            14 -> UnknownHRMode
                            _  -> NullHRMode
+-- | translate a numeric maternal heart rate into the symbolic heart rate mode
+translateMHRMode :: (Num a, Eq a) => a -> MHRMode
+translateMHRMode mhrdata = case mhrdata of
+  0  -> MHRNoHRTransducer
+  1  -> MHRInop
+  6  -> MECG
+  8  -> ExternalMHR
+  10 -> MHRReserved1
+  12 -> MHRReserved2
+  _  -> MHRNullHRMode
+
 -- | Unpack a tocography value
 unpackToco :: Word8 -> TOCO
 unpackToco tocodata = TOCO (fromIntegral tocodata)
@@ -113,15 +121,15 @@ unpackMHR hrdata = MHR (unpackHR hrdata)
 -- | Parse the status into symbolic values
 parseStatus :: Word16 -> CTGStatus 
 parseStatus status =  CTGStatus
-                        isFMPEnabled
-                        ishrTwinOffsetOn
-                        isdecgLogicOn
-                        ishrCrossChanVerOn
-                        isTelemetryOn
-                        isfspo2Available
-                        isctgDataDeleted
-                        isctgDataInserted
                         isMonitorOn
+                        isctgDataInserted
+                        isctgDataDeleted
+                        isfspo2Available
+                        isTelemetryOn
+                        ishrCrossChanVerOn
+                        isdecgLogicOn
+                        ishrTwinOffsetOn
+                        isFMPEnabled
   where isFMPEnabled       = testBit status 0
         ishrTwinOffsetOn   = testBit status 1
         isdecgLogicOn      = testBit status 5

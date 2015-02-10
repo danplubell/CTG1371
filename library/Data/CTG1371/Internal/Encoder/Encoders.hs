@@ -89,22 +89,29 @@ packTOCO toco acc = acc ++ [getTOCORate toco]
 
 
 -- | Encodes the heart rate modes.  The heart modes are stored in two bytes
-encodeHRModes :: HRMode->HRMode->HRMode -> BS.ByteString
+encodeHRModes :: HRMode->HRMode->MHRMode -> BS.ByteString
 encodeHRModes hr1Mode hr2Mode mhrMode = BS.pack $ encodeWord16 (translateHRMode hr1Mode `shiftL` 12
                                                                .|. translateHRMode hr2Mode `shiftL` 8
-                                                               .|. translateHRMode mhrMode `shiftL` 4)
+                                                               .|. translateMHRMode mhrMode `shiftL` 4)
                                                                
   where translateHRMode hrMode= case hrMode of
           NoHRTransducer -> 0
           Inop           -> 1
           US             -> 2
           DECG           -> 4
-          MECG           -> 6
-          ExternalMRH    -> 8
-          Reserved1      -> 10
           Reserved2      -> 12
           UnknownHRMode  -> 14
-          NullHRMode     -> 0 
+          NullHRMode     -> 0
+        translateMHRMode  mhr = case mhr of
+          MHRInop          -> 1
+          MHRNoHRTransducer  -> 0
+          MECG             -> 6
+          ExternalMHR      -> 8
+          MHRReserved1     -> 10
+          MHRReserved2     -> 12
+          MHRUnknownMode   -> 14
+          MHRNullHRMode    -> 0
+          
 -- | Encode the toco mode into a ByteString                                  
 encodeTOCOMode :: TOCOMode -> BS.ByteString
 encodeTOCOMode tocoMode = BS.pack  [translateTOCOMode]

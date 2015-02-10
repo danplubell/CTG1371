@@ -10,6 +10,14 @@ module Data.CTG1371.Internal.Types (
                      , getDataInsertedStatus
                      , getMonitorOnStatus
                      , setMonitorOn
+                     , setDataInsertedStatus
+                     , setDataDeletedStatus
+                     , setFSPO2AvailableStatus
+                     , setTelemetryOnStatus
+                     , setHRCrossChannelVer
+                     , setFMPEnabled
+                     , setDECGLogicOn
+                     , setHRTwinOffset
                      , getHR1
                      , getHR2
                      , getMHR
@@ -50,6 +58,7 @@ module Data.CTG1371.Internal.Types (
                      , MHR(..)
                      , TOCO(..)
                      , HRMode(..)
+                     , MHRMode (..)
                      , TOCOMode(..)) where
 import Prelude hiding (id, (.), mod)
 import Data.Label
@@ -66,15 +75,39 @@ data CTGStatus = CTGStatus { _monitorOn::Bool
                            , _decgLogicOn::Bool
                            , _hrTwinOffsetOn::Bool     
                            , _fmpEnabled::Bool
-                           } deriving (Show)
+                           } deriving (Show,Eq)
 
 mkLabels [''CTGStatus]
 
 setMonitorOn :: Bool -> CTGStatus -> CTGStatus
 setMonitorOn = set monitorOn
 
+setDataInsertedStatus :: Bool -> CTGStatus -> CTGStatus
+setDataInsertedStatus = set ctgDataInserted
+
+setDataDeletedStatus :: Bool -> CTGStatus -> CTGStatus
+setDataDeletedStatus = set ctgDataDeleted
+
+setFSPO2AvailableStatus :: Bool -> CTGStatus -> CTGStatus
+setFSPO2AvailableStatus = set fspo2Available
+
+setTelemetryOnStatus :: Bool -> CTGStatus -> CTGStatus
+setTelemetryOnStatus = set telemetryOn
+
+setHRCrossChannelVer :: Bool -> CTGStatus -> CTGStatus
+setHRCrossChannelVer = set hrCrossChannelVer
+
+setFMPEnabled :: Bool -> CTGStatus -> CTGStatus
+setFMPEnabled = set fmpEnabled
+
+setDECGLogicOn :: Bool -> CTGStatus -> CTGStatus
+setDECGLogicOn = set decgLogicOn
+
+setHRTwinOffset :: Bool -> CTGStatus -> CTGStatus
+setHRTwinOffset = set hrTwinOffsetOn
+
 -- | Represents the symbolic value of the signal quality
-data SignalQuality = SignalRed | SignalYellow | SignalGreen deriving (Show)
+data SignalQuality = SignalRed | SignalYellow | SignalGreen deriving (Show,Eq)
 
 -- | Represents the symbolic value of the fetal movement indicator
 data FetalMovement = Movement | NoMovement | NullMovement deriving (Show,Eq)
@@ -83,7 +116,7 @@ data FetalMovement = Movement | NoMovement | NullMovement deriving (Show,Eq)
 data HR = HR { _signalQuality::SignalQuality
              , _heartRate::Word16
              , _blankTrace::Bool
-             }  deriving (Show)
+             }  deriving (Show,Eq)
 
 mkLabels [''HR]
 
@@ -114,7 +147,7 @@ setBlankTraceInd = set blankTrace
 -- | Represents the first heart rate value
 data HR1 = HR1 { _fmp::FetalMovement
                , _hr1::HR  
-               } deriving (Show) 
+               } deriving (Show,Eq) 
 mkLabels [''HR1]
 
 -- | Gets the fetal movement value from a first heart rate value
@@ -145,7 +178,7 @@ setHR1HeartRate = set (heartRate.hr1)
 buildHR1 :: FetalMovement -> SignalQuality -> Word16 -> Bool -> HR1
 buildHR1 fm sq hr bt = HR1 fm (HR sq hr bt)
 -- | Represents a second heart rate
-data HR2 = HR2 { _hr2::HR } deriving (Show)
+data HR2 = HR2 { _hr2::HR } deriving (Show,Eq)
 mkLabels [''HR2]
 
 -- | Get the signal quality from a second heart rate value
@@ -160,7 +193,7 @@ buildHR2 :: SignalQuality->Word16 -> Bool -> HR2
 buildHR2 sq hr bt = HR2 (HR sq hr bt)
 
 -- | Represents the maternal heart rate
-data MHR = MHR { _mhr::HR } deriving (Show)
+data MHR = MHR { _mhr::HR } deriving (Show,Eq)
 
 mkLabels [''MHR]
 
@@ -176,7 +209,7 @@ buildMHR :: SignalQuality -> Word16 -> Bool ->  MHR
 buildMHR sq hr bt = MHR(HR sq hr bt)
 
 -- | Represents a tocography value
-data TOCO = TOCO { _tocoRate::Word8 } deriving (Show)
+data TOCO = TOCO { _tocoRate::Word8 } deriving (Show,Eq)
 mkLabels [''TOCO]
 
 -- | Gets the tocography rate from a tocography value
@@ -187,10 +220,13 @@ buildTOCO :: Word8 -> TOCO
 buildTOCO  = TOCO 
 
 -- | Represents the possible heart rate modes
-data HRMode = Inop | NoHRTransducer | US | DECG | MECG | ExternalMRH | UnknownHRMode |Reserved1 | Reserved2 | NullHRMode  deriving (Show)
+data HRMode = Inop | NoHRTransducer | US | DECG | UnknownHRMode | Reserved2 | NullHRMode  deriving (Show,Eq)
+
+-- | Represents the possible maternal heart rate modes
+data MHRMode = MHRInop | MHRNoHRTransducer | MECG | ExternalMHR | MHRReserved1 | MHRReserved2 | MHRUnknownMode | MHRNullHRMode deriving (Show,Eq)
 
 -- | Represents the possible tocography modes
-data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode | NullTOCOMode  deriving (Show)
+data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode | NullTOCOMode  deriving (Show,Eq)
 
 data CTGData = CTGData { _ctgStatus::CTGStatus
                        , _ctgHR1::[HR1]
@@ -199,9 +235,9 @@ data CTGData = CTGData { _ctgStatus::CTGStatus
                        , _ctgToco::[TOCO]
                        , _ctgHR1Mode::HRMode
                        , _ctgHR2Mode::HRMode
-                       , _ctgMHRMode::HRMode
+                       , _ctgMHRMode::MHRMode
                        , _ctgTocoMode::TOCOMode
-                       }  deriving (Show)
+                       }  deriving (Show,Eq)
 
 mkLabels [ ''CTGData]
 
@@ -234,7 +270,7 @@ getHR2Mode :: CTGData -> HRMode
 getHR2Mode = get ctgHR2Mode
 
 -- | Get the maternal rate mode
-getMHRMode :: CTGData -> HRMode
+getMHRMode :: CTGData -> MHRMode
 getMHRMode = get ctgMHRMode
 
 -- | Get the mode of the tocography data
