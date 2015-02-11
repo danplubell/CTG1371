@@ -176,7 +176,8 @@ spec = describe "Test Encoder Internal Functions" $ do
          it "test encodeCTGStatus with HR Twin Offset set" $ do
            encodeCTGStatus (setHRTwinOffset True ctgStatus)
              `shouldBe` BS.pack [0,2]
-         describe "Test Exposed Methods" $ do
+
+         describe "test that parsed instance and encoded instance are equal" $ do
            it "test encodeCTG method" $ do
              (ctgData == ctgParser ( BL.toStrict (encodeCTG ctgData)))  `shouldBe`  True 
 
@@ -186,13 +187,13 @@ ctgStatus = CTGStatus False False False False False False False False False
 
 ctgStatusAll :: CTGStatus
 ctgStatusAll = setHRTwinOffset True
-               $ setDECGLogicOn True
-               $ setFMPEnabled True
-               $ setHRCrossChannelVer True
-               $ setTelemetryOnStatus True
-               $ setFSPO2AvailableStatus True
-               $ setDataDeletedStatus True
-               $ setDataInsertedStatus True
+               . setDECGLogicOn True
+               . setFMPEnabled True
+               . setHRCrossChannelVer True
+               . setTelemetryOnStatus True
+               . setFSPO2AvailableStatus True
+               . setDataDeletedStatus True
+               . setDataInsertedStatus True
                $ setMonitorOn True ctgStatus 
 hr1TestRates :: [HR1]
 hr1TestRates = [ HR1 Movement $ HR SignalGreen 100 False
@@ -224,11 +225,11 @@ ctgData = CTGData ctgStatusAll hr1TestRates hr2TestRates mhrTestRates tocoTestRa
 
 -- | convert a decimal value to a string of binary digits such as "1010101"
 dec2bin :: Int -> [Char]
-dec2bin = reverse . map intToDigit . unfoldr (\x -> if x==0 then Nothing else Just(rem x 2, div x 2))
+dec2bin = reverse . fmap intToDigit . unfoldr (\x -> if x==0 then Nothing else Just(rem x 2, div x 2))
 
 -- | convert a CTGData instance into a list of strings of binary digits from the bytestring
 ctgBinToString:: CTGData -> [String]
-ctgBinToString ctgdata = map (cnv2BinStr) (BL.unpack $ encodeCTG ctgdata)
+ctgBinToString ctgdata = fmap (cnv2BinStr) (BL.unpack $ encodeCTG ctgdata)
   where cnv2BinStr n = dec2bin $ fromIntegral n
 
   

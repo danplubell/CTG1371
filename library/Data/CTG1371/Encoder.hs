@@ -1,4 +1,17 @@
-module Data.CTG1371.Encoder (encodeCTG)  where
+module Data.CTG1371.Encoder ( encodeCTG
+                            , CTGData(..)
+                            , CTGStatus(..)
+                            , SignalQuality(..)
+                            , FetalMovement(..)
+                            , HR(..)
+                            , HR1(..)
+                            , HR2(..)
+                            , MHR(..)
+                            , TOCO(..)
+                            , HRMode(..)
+                            , MHRMode (..)
+                            , TOCOMode(..)
+                            )  where
 
 import Data.CTG1371.Internal.Types
 import Data.CTG1371.Internal.Encoder.Encoders

@@ -5,18 +5,18 @@ import Data.Word
 import Data.Bits
 import qualified Data.ByteString as BS
 import qualified Data.Binary.Put as P
-
+import Data.Monoid (mappend)
 -- | Encodes a CTGData instance into a Put action
 buildCTGByteString :: CTGData -> P.Put
 buildCTGByteString  ctgData = do
   P.putWord8 67 -- 'C' indicates a 'C' data block
-  P.putByteString $ encodeCTGStatus $ getCTGStatus ctgData
-  P.putByteString $ encodeHR1 $ getHR1 ctgData
-  P.putByteString $ encodeHR2 $ getHR2 ctgData
-  P.putByteString $ encodeMHR $ getMHR ctgData
-  P.putByteString $ encodeTOCO $ getTOCO ctgData
-  P.putByteString $ encodeHRModes (getHR1Mode ctgData) (getHR2Mode ctgData) (getMHRMode ctgData)
-  P.putByteString $ encodeTOCOMode $ getTOCOMode ctgData
+  P.putByteString . encodeCTGStatus $ getCTGStatus ctgData
+  P.putByteString . encodeHR1 $ getHR1 ctgData
+  P.putByteString . encodeHR2 $ getHR2 ctgData
+  P.putByteString . encodeMHR $ getMHR ctgData
+  P.putByteString . encodeTOCO $ getTOCO ctgData
+  P.putByteString $  encodeHRModes (getHR1Mode ctgData) (getHR2Mode ctgData) (getMHRMode ctgData)
+  P.putByteString . encodeTOCOMode $ getTOCOMode ctgData
   
 -- | Encode the CTG status into the ByteString.  The status indicators are stored in two 8 bit words
 encodeCTGStatus :: CTGStatus -> BS.ByteString
@@ -50,7 +50,7 @@ encodeHR1 hr1Values = BS.pack $ foldr packHR1 [] hr1Values
 
 -- | Encode a single Heart Rate 1 value and add it to the accumulated ByteString
 packHR1:: HR1 -> [Word8] -> [Word8]
-packHR1 hr1  acc = acc ++  encodeWord16 ( encodeHR
+packHR1 hr1  acc = acc   `mappend`  encodeWord16 ( encodeHR
                                              (getHR1HeartRate hr1)
                                              (getHR1FetalMovement hr1)
                                              (getHR1SignalQuality hr1)
@@ -62,7 +62,7 @@ encodeHR2 hr2Values = BS.pack $ foldr packHR2 [] hr2Values
 
 -- | Encodes a single Heart Rate 2 value and adds it to the accumulated ByteString
 packHR2 :: HR2 -> [Word8] -> [Word8]
-packHR2 hr2 acc = acc ++ encodeWord16 (encodeHR
+packHR2 hr2 acc = acc `mappend` encodeWord16 (encodeHR
                                          (getHR2HeartRate hr2)
                                          NullMovement
                                          (getHR2SignalQuality hr2)
@@ -71,9 +71,9 @@ packHR2 hr2 acc = acc ++ encodeWord16 (encodeHR
 encodeMHR :: [MHR] -> BS.ByteString
 encodeMHR mhrValues = BS.pack $ foldr packMHR [] mhrValues
 
- -- | Add a encodes Maternal Heart Rate to the accumulated ByteString
+-- | Add a encodes Maternal Heart Rate to the accumulated ByteString
 packMHR :: MHR -> [Word8] -> [Word8]
-packMHR mhr acc = acc ++ encodeWord16 (encodeHR
+packMHR mhr acc = acc `mappend` encodeWord16 (encodeHR
                                          (getMHRHeartRate mhr)
                                          NullMovement
                                          (getMHRSignalQuality mhr)
@@ -85,7 +85,7 @@ encodeTOCO tocovalues= BS.pack $ foldr packTOCO [] tocovalues
 
 -- | Adds a TOCO rate to the accumulated ByteString
 packTOCO :: TOCO -> [Word8] -> [Word8]
-packTOCO toco acc = acc ++ [getTOCORate toco]
+packTOCO toco acc = acc `mappend` [getTOCORate toco]
 
 
 -- | Encodes the heart rate modes.  The heart modes are stored in two bytes

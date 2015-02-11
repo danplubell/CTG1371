@@ -1,4 +1,16 @@
-module Data.CTG1371.Parser (ctgParser)  where
+module Data.CTG1371.Parser (ctgParser
+                            , CTGData(..)
+                            , CTGStatus(..)
+                            , SignalQuality(..)
+                            , FetalMovement(..)
+                            , HR(..)
+                            , HR1(..)
+                            , HR2(..)
+                            , MHR(..)
+                            , TOCO(..)
+                            , HRMode(..)
+                            , MHRMode (..)
+                            , TOCOMode(..)) where
 
 import Data.CTG1371.Internal.Types
 import Data.CTG1371.Internal.Parser.Parsers

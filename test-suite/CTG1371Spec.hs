@@ -143,8 +143,19 @@ spec =
       it "HR2Mode Unknown mode" $ do
         unpackHR2Mode 3584 `shouldBe` UnknownHRMode
 
-      
-        
+      it "unpackHR hr = 100, signal quality = Red, Movement = True" $ do
+        unpackHR1 2448 `shouldBe` HR1 Movement ( HR SignalRed 100 False)
+
+      it "unpackHR hr = 100, signal quality = Green, Movement = True" $ do
+        unpackHR1 18832 `shouldBe` HR1 Movement ( HR SignalGreen 100 False)
+
+      it "unpackHR hr = 100, signal quality = Yellow, Movement = True" $ do
+        unpackHR1 10640 `shouldBe` HR1 Movement ( HR SignalYellow 100 False)
+
+      it "unpackHR hr = 100, signal quality = Yellow, Movement = False" $ do
+        unpackHR1 8592 `shouldBe` HR1 NoMovement ( HR SignalYellow 100 False)
+
+
 buildHR ::Int -> Bool -> SignalQuality -> Int
 buildHR rate movement quality = rate * 4 + calcMovement + calcQuality
   where calcMovement = if movement then 0x800 else 0

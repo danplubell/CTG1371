@@ -35,5 +35,6 @@ run:
 	cabal run --jobs CTG1371
 
 test:
-	cabal test --jobs
+	test -d dist/hpc/tix/tests || mkdir -p dist/hpc/tix/tests
+	export HPCTIXFILE=dist/hpc/tix/tests/tests.tix; cabal test
 	cabal check

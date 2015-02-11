@@ -228,6 +228,7 @@ data MHRMode = MHRInop | MHRNoHRTransducer | MECG | ExternalMHR | MHRReserved1 |
 -- | Represents the possible tocography modes
 data TOCOMode = NoTOCOTransducer | ExternalTOCO | IUP | UnknownTOCOMode | NullTOCOMode  deriving (Show,Eq)
 
+-- | Represents an instance of cardiotocography data
 data CTGData = CTGData { _ctgStatus::CTGStatus
                        , _ctgHR1::[HR1]
                        , _ctgHR2::[HR2]
