@@ -95,9 +95,9 @@ translateMHRMode mhrdata = case mhrdata of
   12 -> MHRReserved2
   _  -> MHRNullHRMode
 
--- | Unpack a tocography value
+-- | Unpack a tocography value (resolutions is 0.5)
 unpackToco :: Word8 -> TOCO
-unpackToco tocodata = TOCO (fromIntegral tocodata)
+unpackToco tocodata = TOCO $ fromIntegral tocodata `div` 2
 
 -- | Unpack a first heart rate value
 unpackHR::Word16 -> HR

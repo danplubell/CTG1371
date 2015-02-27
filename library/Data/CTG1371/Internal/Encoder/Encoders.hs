@@ -83,9 +83,9 @@ packMHR mhr acc = acc `mappend` encodeWord16 (encodeHR
 encodeTOCO :: [TOCO] -> BS.ByteString
 encodeTOCO tocovalues= BS.pack $ foldr packTOCO [] tocovalues
 
--- | Adds a TOCO rate to the accumulated ByteString
+-- | Adds a TOCO rate to the accumulated ByteString (resolution = 0.5)
 packTOCO :: TOCO -> [Word8] -> [Word8]
-packTOCO toco acc = acc `mappend` [getTOCORate toco]
+packTOCO toco acc = acc `mappend` [2* getTOCORate toco]
 
 
 -- | Encodes the heart rate modes.  The heart modes are stored in two bytes
